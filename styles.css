@@ -1,49 +1,67 @@
 body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    padding: 20px;
-}
-.status {
-    color: green;
-    font-weight: bold;
-}
-.error {
-    color: red;
-    font-weight: bold;
-}
-.container {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: space-around;
+    font-family: Arial, sans-serif;
 }
-.prise {
-    width: 280px;
+
+.sidebar {
+    width: 250px;
+    background-color: #343a40;
+    color: white;
+    height: 100vh;
     padding: 20px;
-    margin: 10px;
+    position: fixed;
+}
+
+.sidebar h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar ul li {
+    margin: 10px 0;
+}
+
+.sidebar ul li a {
+    color: white;
+    text-decoration: none;
+    display: block;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.sidebar ul li a:hover {
+    background-color: #495057;
+}
+
+.main-content {
+    margin-left: 270px;
+    padding: 20px;
+    flex-grow: 1;
+}
+
+.prise-card {
     border: 2px solid #ddd;
     border-radius: 8px;
+    padding: 20px;
     background-color: #f9f9f9;
+    margin: 10px;
+    width: 300px;
 }
-.prise h2 {
+
+.prise-card h2 {
     margin-top: 0;
 }
-.prise .data {
-    font-size: 20px;
+
+.prise-card .data {
+    font-size: 18px;
     font-weight: bold;
-    margin: 5px 0;
 }
-.prise button {
-    margin: 5px 0;
-    padding: 10px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-.prise button:hover {
-    background-color: #45a049;
-}
-.remove-prise {
-    background-color: red;
+
+.prise-card button {
+    margin-top: 10px;
 }
