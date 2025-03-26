@@ -17,22 +17,26 @@ class ShellyManager {
     /** Initialisation MQTT */
     initMQTT() {
         this.client = mqtt.connect(this.mqttBroker, this.mqttOptions);
-
+        
+        // 🔗 Quand la connexion est établie avec le broker MQTT
         this.client.on("connect", () => {
             console.log("✅ Connecté au broker MQTT !");
             document.getElementById("status").textContent = "✅ Connecté";
         });
-
+        
+        // 📩 Quand un message est reçu sur un topic MQTT
         this.client.on("message", (topic, message) => {
             console.log(`📩 Message reçu de ${topic}:`, message.toString());
             this.updatePriseData(topic, message.toString());
         });
-
+        
+        // ❌ Gestion des erreurs de connexion MQTT
         this.client.on("error", (err) => {
             console.error("❌ Erreur MQTT :", err);
             document.getElementById("status").textContent = "❌ Erreur de connexion MQTT";
         });
     }
+
 
     /** Ajoute un événement sur le bouton "Ajouter une prise" */
     initEventListeners() {
