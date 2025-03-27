@@ -18,22 +18,22 @@ class ShellyManager {
     initMQTT() {
         this.client = mqtt.connect(this.mqttBroker, this.mqttOptions);
         
-        // 🔗 Quand la connexion est établie avec le broker MQTT
+        // Quand la connexion est établie avec le broker MQTT
         this.client.on("connect", () => {
-            console.log("✅ Connecté au broker MQTT !");
-            document.getElementById("status").textContent = "✅ Connecté";
+            console.log("Connecté au broker MQTT !");
+            document.getElementById("status").textContent = "Connecté";
         });
         
-        // 📩 Quand un message est reçu sur un topic MQTT
+        // Quand un message est reçu sur un topic MQTT
         this.client.on("message", (topic, message) => {
-            console.log(`📩 Message reçu de ${topic}:`, message.toString());
+            console.log(`Message reçu de ${topic}:`, message.toString());
             this.updatePriseData(topic, message.toString());
         });
         
-        // ❌ Gestion des erreurs de connexion MQTT
+        // Gestion des erreurs de connexion MQTT
         this.client.on("error", (err) => {
-            console.error("❌ Erreur MQTT :", err);
-            document.getElementById("status").textContent = "❌ Erreur de connexion MQTT";
+            console.error("Erreur MQTT :", err);
+            document.getElementById("status").textContent = "Erreur de connexion MQTT";
         });
     }
 
@@ -49,21 +49,21 @@ class ShellyManager {
                 const ip = document.getElementById("prise-ip").value.trim();
 
                 if (!name || !topic || !ip) {
-                    alert("⚠️ Veuillez remplir tous les champs !");
+                    alert("Veuillez remplir tous les champs !");
                     return;
                 }
 
                 this.addPrise(name, topic, ip);
             });
         } else {
-            console.error("❌ Bouton 'Ajouter une prise' non trouvé !");
+            console.error("Bouton 'Ajouter une prise' non trouvé !");
         }
     }
 
     /** Ajoute une prise dynamiquement */
     addPrise(name, topic, ip) {
         if (this.prises[name]) {
-            alert("⚠️ Cette prise existe déjà !");
+            alert("Cette prise existe déjà !");
             return;
         }
 
@@ -81,7 +81,7 @@ class ShellyManager {
             <p><strong>Date :</strong> <span class="data date">-</span></p>
             <button class="turnOn">Allumer</button>
             <button class="turnOff">Éteindre</button>
-            <button class="remove-prise">🗑️ Supprimer</button>
+            <button class="remove-prise">Supprimer</button>
         `;
         container.appendChild(priseDiv);
 
@@ -92,71 +92,66 @@ class ShellyManager {
         priseDiv.querySelector(".remove-prise").addEventListener("click", () => this.removePrise(name));
     }
 
-/** Supprime une prise immédiatement et envoie la requête pour l'éteindre */
-removePrise(name) {
-    if (!this.prises[name]) {
-        console.warn(`⚠️ Prise ${name} introuvable.`);
-        return;
+    /** Supprime une prise immédiatement et envoie la requête pour l'éteindre */
+    removePrise(name) {
+        if (!this.prises[name]) {
+            console.warn(`Prise ${name} introuvable.`);
+            return;
+        }
+
+        const ip = this.prises[name].ip;
+        const url = `http://${ip}/relay/0?turn=off`;
+
+        console.log(`Extinction de la prise ${name} en arrière-plan...`);
+
+        fetch(url, { method: "GET" })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP: ${response.status}`);
+                }
+                return response.text();
+            })
+            .then(() => {
+                console.log(`Prise ${name} éteinte avec succès.`);
+            })
+            .catch(error => {
+                console.error(`Erreur lors de l'extinction de ${name}:`, error);
+            });
+
+        const topic = this.prises[name].topic;
+        this.client.unsubscribe(topic);
+        delete this.prises[name];
+
+        const priseElement = document.getElementById(name);
+        if (priseElement) {
+            priseElement.remove();
+            console.log(`Prise ${name} supprimée immédiatement.`);
+        } else {
+            console.warn(`Élément DOM introuvable pour ${name}`);
+        }
     }
 
-    const ip = this.prises[name].ip; // Supposons que chaque prise a une IP stockée
-    const url = `http://${ip}/relay/0?turn=off`;
+    /** Envoie une requête HTTP pour allumer/éteindre */
+    sendRequest(ip, turnOn) {
+        const action = turnOn ? "on" : "off";
+        const url = `http://${ip}/relay/0?turn=${action}`;
 
-    console.log(`⚡ Extinction de la prise ${name} en arrière-plan...`);
+        console.log(`Envoi requête à: ${url}`);
 
-    // Envoi de la requête fetch en parallèle
-    fetch(url, { method: "GET" })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Erreur HTTP: ${response.status}`);
-            }
-            return response.text();
-        })
-        .then(() => {
-            console.log(`✅ Prise ${name} éteinte avec succès.`);
-        })
-        .catch(error => {
-            console.error(`❌ Erreur lors de l'extinction de ${name}:`, error);
-        });
-
-    // Suppression immédiate de la prise
-    const topic = this.prises[name].topic;
-    this.client.unsubscribe(topic);
-    delete this.prises[name];
-
-    // Suppression de l'élément du DOM
-    const priseElement = document.getElementById(name);
-    if (priseElement) {
-        priseElement.remove();
-        console.log(`🗑️ Prise ${name} supprimée immédiatement.`);
-    } else {
-        console.warn(`⚠️ Élément DOM introuvable pour ${name}`);
+        fetch(url, { method: "GET" })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.text();
+            })
+            .then(data => {
+                console.log(`Réponse reçue: ${data}`);
+            })
+            .catch(error => {
+                console.error("Erreur lors de la requête:", error);
+            });
     }
-}
-
-
-   /** Envoie une requête HTTP pour allumer/éteindre */
-sendRequest(ip, turnOn) {
-    const action = turnOn ? "on" : "off";
-    const url = `http://${ip}/relay/0?turn=${action}`;
-
-    console.log(`📡 Envoi requête à: ${url}`);
-
-    fetch(url, { method: "GET" })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.text();
-        })
-        .then(data => {
-            console.log(`✅ Réponse reçue: ${data}`);
-        })
-        .catch(error => {
-            console.error("❌ Erreur lors de la requête:", error);
-        });
-}
-
 
     /** Met à jour les données reçues de MQTT */
     updatePriseData(topic, message) {
@@ -171,7 +166,7 @@ sendRequest(ip, turnOn) {
             priseDiv.querySelector(".energy").textContent = (data.total / 1000).toFixed(3) || "0.000";
             priseDiv.querySelector(".date").textContent = new Date(data.minute_ts * 1000).toLocaleString("fr-FR");
         } catch (err) {
-            console.error("❌ Erreur JSON:", err);
+            console.error("Erreur JSON:", err);
         }
     }
 }
