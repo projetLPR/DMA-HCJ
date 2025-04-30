@@ -1,3 +1,4 @@
+// --- Classe ShellyManager ---
 class ShellyManager {
     constructor() {
         this.mqttBroker = "wss://47567f9a74b445e6bef394abec5c83a1.s1.eu.hivemq.cloud:8884/mqtt";
@@ -9,12 +10,13 @@ class ShellyManager {
         };
         this.client = null;
         this.prises = {}; // Stocke les prises dynamiquement
+        this.apiUrl = 'http://localhost:3000';
 
-        this.initMQTT(); // Initialise la connexion MQTT
-        this.initEventListeners(); // Active les événements
+        this.initMQTT(); // Connexion MQTT
+        this.initEventListeners(); // Bouton "Ajouter"
+        this.loadPrisesFromAPI(); // Charge à l'ouverture
     }
 
-    /** Initialisation MQTT */
     initMQTT() {
         this.client = mqtt.connect(this.mqttBroker, this.mqttOptions);
 
@@ -35,20 +37,16 @@ class ShellyManager {
         });
 
         this.client.on("offline", () => {
-            console.log("❌ Broker MQTT hors ligne !");
             document.getElementById("status").textContent = "❌ Hors ligne";
         });
 
         this.client.on("close", () => {
-            console.log("❌ Connexion fermée au broker MQTT");
             document.getElementById("status").textContent = "❌ Connexion fermée";
         });
     }
 
-    /** Ajoute un événement sur le bouton "Ajouter une prise" */
     initEventListeners() {
         const addButton = document.getElementById("add-prise-btn");
-
         if (addButton) {
             addButton.addEventListener("click", () => {
                 const name = document.getElementById("prise-name").value.trim();
@@ -62,17 +60,35 @@ class ShellyManager {
 
                 this.addPrise(name, locality, id);
             });
-        } else {
-            console.error("❌ Bouton 'Ajouter une prise' non trouvé !");
         }
     }
 
-    /** Ajoute une prise dynamiquement */
+    loadPrisesFromAPI() {
+        fetch(`${this.apiUrl}/ids`)
+            .then(res => res.json())
+            .then(data => {
+                data.forEach(prise => {
+                    const id = prise.valeur_id;
+                    const name = prise.nom_prise;
+                    const locality = prise.localite;
+
+                    if (!this.prises[id]) {
+                        this.addPrise(name, locality, id);
+                    }
+                });
+            })
+            .catch(err => console.error("Erreur chargement API:", err));
+    }
+
+    refreshPrisesFromAPI() {
+        // Supprimer toutes les prises affichées
+        Object.keys(this.prises).forEach(id => this.removePrise(id));
+        // Recharger depuis la BDD
+        this.loadPrisesFromAPI();
+    }
+
     addPrise(name, locality, id) {
-        if (this.prises[id]) {
-            alert("Cette prise existe déjà !");
-            return;
-        }
+        if (this.prises[id]) return;
 
         this.prises[id] = { name, locality, id };
 
@@ -82,21 +98,19 @@ class ShellyManager {
         priseDiv.id = id;
         priseDiv.innerHTML = `
             <h2>${name} - <em>${locality}</em></h2>
-            <p><strong>ID de la prise :</strong> <span class="data topic-id">${id}</span></p>
-            <p><strong>État :</strong> <span class="data state">-</span></p>
-            <p><strong>Puissance :</strong> <span class="data power">-</span> W</p>
-            <p><strong>Consommation :</strong> <span class="data energy">0.000</span> kWh</p>
-            <p><strong>Date :</strong> <span class="data date">-</span></p>
+            <p><strong>ID :</strong> ${id}</p>
+            <p><strong>État :</strong> <span class="state">-</span></p>
+            <p><strong>Puissance :</strong> <span class="power">-</span> W</p>
+            <p><strong>Consommation :</strong> <span class="energy">0.000</span> kWh</p>
+            <p><strong>Date :</strong> <span class="date">-</span></p>
             <button class="turnOn">Allumer</button>
             <button class="turnOff">Éteindre</button>
             <button class="remove-prise">Supprimer</button>
         `;
         container.appendChild(priseDiv);
 
-        // Abonnement au topic de réception de données
         this.client.subscribe(`shellyplusplugs-${id}/test`);
 
-        // Demande immédiate de l'état de la prise
         const requestPayload = {
             id: Date.now(),
             src: "web_client",
@@ -105,13 +119,11 @@ class ShellyManager {
         };
         this.client.publish(`shellyplusplugs-${id}/rpc`, JSON.stringify(requestPayload));
 
-        // Boutons
         priseDiv.querySelector(".turnOn").addEventListener("click", () => this.togglePrise(id, true));
         priseDiv.querySelector(".turnOff").addEventListener("click", () => this.togglePrise(id, false));
         priseDiv.querySelector(".remove-prise").addEventListener("click", () => this.removePrise(id));
     }
 
-    /** Envoie une commande MQTT pour allumer/éteindre la prise */
     togglePrise(id, turnOn) {
         const payload = {
             id: 1,
@@ -121,9 +133,6 @@ class ShellyManager {
         };
 
         this.client.publish(`shellyplusplugs-${id}/rpc`, JSON.stringify(payload));
-        console.log(`Commande envoyée à shellyplusplugs-${id}: ${turnOn ? "Allumer" : "Éteindre"}`);
-
-        // ➕ Mise à jour directe de l'état dans l'interface
         const priseDiv = document.getElementById(id);
         if (priseDiv) {
             priseDiv.querySelector(".state").textContent = turnOn ? "Allumée" : "Éteinte";
@@ -131,28 +140,17 @@ class ShellyManager {
         }
     }
 
-    /** Supprime une prise */
     removePrise(id) {
-        if (!this.prises[id]) {
-            console.warn(`Prise ${id} introuvable.`);
-            return;
-        }
+        if (!this.prises[id]) return;
 
-        // Éteindre la prise avant de la supprimer
         this.togglePrise(id, false);
-
-        // Désabonnement du topic de la prise
         this.client.unsubscribe(`shellyplusplugs-${id}/test`);
         delete this.prises[id];
 
-        const priseElement = document.getElementById(id);
-        if (priseElement) {
-            priseElement.remove();
-            console.log(`Prise ${id} supprimée.`);
-        }
+        const element = document.getElementById(id);
+        if (element) element.remove();
     }
 
-    /** Met à jour les données reçues de MQTT */
     updatePriseData(topic, message) {
         const priseKey = Object.keys(this.prises).find(key => topic.includes(this.prises[key].id));
         if (!priseKey) return;
@@ -160,61 +158,161 @@ class ShellyManager {
         try {
             const data = JSON.parse(message);
             const priseDiv = document.getElementById(priseKey);
+            if (!priseDiv) return;
 
-            // Affichage de l’état
             if (data.result && typeof data.result.on === "boolean") {
                 priseDiv.querySelector(".state").textContent = data.result.on ? "Allumée" : "Éteinte";
             }
 
-            // Si ce sont des données de consommation
-            if (data.apower !== undefined || data.current !== undefined || data.total !== undefined) {
+            if (data.apower !== undefined || data.total !== undefined) {
                 priseDiv.querySelector(".power").textContent = data.apower || "-";
-                priseDiv.querySelector(".current").textContent = data.current || "-";
-                priseDiv.querySelector(".energy").textContent = (data.total / 1000).toFixed(3) || "0.000";
+                priseDiv.querySelector(".energy").textContent = (data.total / 1000).toFixed(3);
                 priseDiv.querySelector(".date").textContent = new Date(data.minute_ts * 1000).toLocaleString("fr-FR");
             }
         } catch (err) {
-            console.error("❌ Erreur JSON:", err);
+            console.error("Erreur JSON:", err);
         }
     }
 }
 
-document.getElementById('update-price-btn').addEventListener('click', function() {
-    const prixKwh = parseFloat(document.getElementById('prix-kwh').value);
-    const messageElement = document.getElementById('update-price-message');
-
-    // Vérification de la validité du prix
-    if (isNaN(prixKwh) || prixKwh <= 0) {
-        messageElement.style.display = 'block';
-        messageElement.style.color = 'red';
-        messageElement.textContent = 'Le prix doit être un nombre supérieur à 0.';
-        return;
+// --- Classe PriseManager ---
+class PriseManager {
+    constructor() {
+        this.listeIDs = [];
+        this.apiUrl = 'http://localhost:3000';
     }
 
-    // Envoi de la requête POST pour mettre à jour le prix
-    fetch('https://api.recharge.cielnewton.fr/update-kwh-price', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ prix_kwh: prixKwh })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            messageElement.style.display = 'block';
-            messageElement.style.color = 'green';
-            messageElement.textContent = data.message; // Message de succès
-        } else {
-            messageElement.style.display = 'block';
-            messageElement.style.color = 'red';
-            messageElement.textContent = data.error || 'Erreur lors de la mise à jour du prix.';
+    ajouterPrise() {
+        const valeurId = document.getElementById('input-id').value.trim();
+        const nomPrise = document.getElementById('input-nom').value.trim();
+        const localite = document.getElementById('input-localite').value.trim();
+
+        if (!valeurId || !nomPrise || !localite) {
+            alert('Veuillez remplir tous les champs.');
+            return;
         }
-    })
-    .catch(error => {
-        messageElement.style.display = 'block';
-        messageElement.style.color = 'red';
-        messageElement.textContent = 'Erreur de réseau.';
-        console.error('Erreur:', error);
-    });
-});
+
+        fetch(`${this.apiUrl}/add`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ valeur_id: valeurId, nom_prise: nomPrise, localite: localite })
+        })
+        .then(res => res.json())
+        .then(data => {
+            alert(data.message);
+            this.chargerIDs();
+            this.chargerPrisesConsultation();
+            if (window.shellyManager) window.shellyManager.refreshPrisesFromAPI();
+        })
+        .catch(err => console.error('Erreur ajout:', err));
+    }
+
+    supprimerID() {
+        const select = document.getElementById('select-ids');
+        const id = select.value;
+        if (!id) return alert('Veuillez choisir une prise à supprimer.');
+
+        if (!confirm('Confirmer la suppression ?')) return;
+
+        fetch(`${this.apiUrl}/delete/${id}`, { method: 'DELETE' })
+        .then(res => res.json())
+        .then(data => {
+            alert(data.message);
+            this.chargerIDs();
+            this.chargerPrisesConsultation();
+            if (window.shellyManager) window.shellyManager.refreshPrisesFromAPI();
+        })
+        .catch(err => console.error('Erreur suppression:', err));
+    }
+
+    modifierPrise() {
+        const select = document.getElementById('select-ids');
+        const id = select.value;
+        const nom = document.getElementById('nouveau-nom').value.trim();
+        const localite = document.getElementById('nouvelle-localite').value.trim();
+
+        if (!id || !nom || !localite) {
+            alert('Veuillez remplir les champs de modification.');
+            return;
+        }
+
+        fetch(`${this.apiUrl}/update/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nom_prise: nom, localite: localite })
+        })
+        .then(res => res.json())
+        .then(data => {
+            alert(data.message);
+            this.chargerIDs();
+            this.chargerPrisesConsultation();
+            if (window.shellyManager) window.shellyManager.refreshPrisesFromAPI();
+        })
+        .catch(err => console.error('Erreur modification:', err));
+    }
+
+    chargerIDs() {
+        fetch(`${this.apiUrl}/ids`)
+        .then(res => res.json())
+        .then(data => {
+            const select = document.getElementById('select-ids');
+            select.innerHTML = '';
+            this.listeIDs = data;
+
+            data.forEach(prise => {
+                const option = document.createElement('option');
+                option.value = prise.id;
+                option.textContent = `${prise.nom_prise} (${prise.valeur_id}) - ${prise.localite}`;
+                select.appendChild(option);
+            });
+        });
+    }
+
+    chargerPrisesConsultation() {
+        fetch(`${this.apiUrl}/ids`)
+        .then(res => res.json())
+        .then(data => {
+            const select = document.getElementById('consultation-select');
+            select.innerHTML = '<option value="">-- Sélectionnez une prise --</option>';
+            data.forEach(prise => {
+                const option = document.createElement('option');
+                option.value = prise.id;
+                option.textContent = `${prise.nom_prise} (${prise.valeur_id}) - ${prise.localite}`;
+                select.appendChild(option);
+            });
+        });
+    }
+
+    afficherDetailsConsultation(event) {
+        const id = event.target.value;
+        const prise = this.listeIDs.find(p => p.id == id);
+        const infoDiv = document.getElementById('info-prise');
+
+        if (prise) {
+            infoDiv.innerHTML = `
+                <strong>Nom:</strong> ${prise.nom_prise}<br>
+                <strong>ID:</strong> ${prise.valeur_id}<br>
+                <strong>Localité:</strong> ${prise.localite}
+            `;
+        } else {
+            infoDiv.innerHTML = '';
+        }
+    }
+
+    initialiser() {
+        this.chargerIDs();
+        this.chargerPrisesConsultation();
+        document.getElementById('consultation-select')
+            .addEventListener('change', this.afficherDetailsConsultation.bind(this));
+    }
+}
+
+// Initialisation globale
+const shellyManager = new ShellyManager();
+window.shellyManager = shellyManager;
+
+const priseManager = new PriseManager();
+window.onload = () => priseManager.initialiser();
+window.ajouterPrise = () => priseManager.ajouterPrise();
+window.supprimerID = () => priseManager.supprimerID();
+window.modifierPrise = () => priseManager.modifierPrise();
