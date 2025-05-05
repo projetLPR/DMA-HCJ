@@ -1,49 +1,103 @@
 body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    padding: 20px;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 20px;
+  background-color: #f0f0f0;
 }
+
+/* Statut de la connexion */
 .status {
-    color: green;
-    font-weight: bold;
+  color: green;
+  font-weight: bold;
 }
+
 .error {
-    color: red;
-    font-weight: bold;
+  color: red;
+  font-weight: bold;
 }
-.container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-around;
+
+/* Conteneur pour les prises */
+#prises-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
 }
+
+/* Style des éléments de prise */
 .prise {
-    width: 280px;
-    padding: 20px;
-    margin: 10px;
-    border: 2px solid #ddd;
-    border-radius: 8px;
-    background-color: #f9f9f9;
+  width: 280px;
+  padding: 20px;
+  margin: 10px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  transition: transform 0.3s ease;
 }
+
+/* Lorsque la prise est survolée */
+.prise:hover {
+  transform: scale(1.05);
+}
+
+/* Titre de la prise */
 .prise h2 {
-    margin-top: 0;
+  margin-top: 0;
+  font-size: 1.2em;
 }
+
+/* Données de la prise */
 .prise .data {
-    font-size: 20px;
-    font-weight: bold;
-    margin: 5px 0;
+  font-size: 20px;
+  font-weight: bold;
+  margin: 5px 0;
 }
+
+/* Styles généraux pour tous les boutons */
+button {
+  margin: 5px 0;
+  padding: 10px;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+/* Boutons dans une prise */
 .prise button {
-    margin: 5px 0;
-    padding: 10px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+  background-color: #4caf50;
 }
+
 .prise button:hover {
-    background-color: #45a049;
+  background-color: #45a049;
 }
+
+/* Bouton de suppression */
 .remove-prise {
-    background-color: red;
+  background-color: red;
+}
+
+.remove-prise:hover {
+  background-color: #e53935;
+}
+
+/* Style pour l'ajout de prise */
+#add-prise-form {
+  margin-bottom: 20px;
+}
+
+#add-prise-form input {
+  padding: 8px;
+  margin: 5px 0;
+  width: 250px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+#add-prise-form button {
+  background-color: #2196f3;
+}
+
+#add-prise-form button:hover {
+  background-color: #1976d2;
 }
