@@ -1,27 +1,62 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MQTT WebSocket - Shelly</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-
+    <link rel="stylesheet" href="../css/admin.css" />
+    <link
+      rel="icon"
+      type="image/png"
+      href="../images/Location-removebg-preview.png"
+    />
+  </head>
+  <body>
     <h1>📡 Suivi Shelly - MQTT WebSocket</h1>
     <p class="status" id="status">Connexion en cours...</p>
 
+    <!-- Formulaire pour ajouter une nouvelle prise -->
     <div id="add-prise-form">
-        <h3>➕ Ajouter une nouvelle prise</h3>
-        <input type="text" id="prise-name" placeholder="Nom de la prise (ex: Prise Salon)">
-        <input type="text" id="prise-topic" placeholder="Topic MQTT (ex: shellyplusplugs-1234/test)">
-        <input type="text" id="prise-ip" placeholder="Adresse IP (ex: 192.168.1.101)">
-        <button id="add-prise-btn">➕ Ajouter</button>
+      <h3>➕ Ajouter une nouvelle prise</h3>
+      <label for="prise-name">Nom de la prise :</label>
+      <input type="text" id="prise-name" placeholder="Nom de la prise" />
+      <br /><br />
+
+      <label for="prise-locality">Localité :</label>
+      <input type="text" id="prise-locality" placeholder="Localité" />
+      <br /><br />
+
+      <label for="prise-id">ID de la prise :</label>
+      <input type="text" id="prise-id" placeholder="ID de la prise" />
+      <br /><br />
+
+      <button id="add-prise-btn">➕ Ajouter</button>
     </div>
 
+    <!-- Formulaire de mise à jour du prix du kWh -->
+    <div id="update-price-form">
+      <h3>💰 Mettre à jour le prix du kWh</h3>
+      <input
+        type="number"
+        id="prix-kwh"
+        placeholder="Entrez le prix du kWh"
+        step="0.01"
+        min="0.01"
+      />
+      <button id="update-price-btn">Mettre à jour le prix</button>
+      <p id="update-price-message" style="display: none"></p>
+      <!-- Message de statut -->
+    </div>
+
+    <!-- Conteneur pour afficher les prises ajoutées -->
     <div id="prises-container"></div>
 
+    <div class="section">
+      <button id="logoutBtn">Déconnexion</button>
+    </div>
+
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
-    <script src="app.js"></script>
-</body>
+    <script src="../javascript/dashboard_admin.js"></script>
+    <script src="../javascript/dashboard.js"></script>
+  </body>
 </html>
