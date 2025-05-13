@@ -1,41 +1,111 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Shelly</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Shelly</title>
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  <link rel="stylesheet" href="dashboard.css" />
+  <link rel="icon" type="image/png" href="../images/Location-removebg-preview.png" />
 </head>
 <body>
-    <div>
-        <h1>Gestion des prises Shelly</h1>
-        
-        <!-- Section Ajouter une prise -->
-        <div>
-            <h2>Ajouter une prise</h2>
-            <input type="text" id="prise-id" placeholder="ID de la prise">
-            <input type="text" id="prise-name" placeholder="Nom de la prise">
-            <input type="text" id="prise-locality" placeholder="Localité">
-            <button id="add-prise-btn">Ajouter la prise</button>
-        </div>
+  <div class="container">
+    <h1 id="message-bienvenue">Dashboard Admin - Shelly</h1>
 
-        <!-- Section Affichage des prises -->
-        <div id="prises-container">
-            <h2>Liste des prises</h2>
-        </div>
-
-        <!-- Consultation -->
-        <div>
-            <h3>Consulter une prise</h3>
-            <select id="consultation-select">
-                <option value="">-- Sélectionnez une prise --</option>
-            </select>
-            <div id="info-prise"></div>
-        </div>
+    <!-- CONTROLES PREMIUM -->
+    <div class="theme-settings">
+      <button id="decrease-text" title="Réduire la taille du texte">A-</button>
+      <button id="increase-text" title="Agrandir la taille du texte">A+</button>
+      <button id="toggle-theme" title="Changer le thème">☀️/🌙</button>
     </div>
-    
-    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
-    <script src="dashboard_admin.js"></script> <!-- Mise à jour du nom du fichier JavaScript -->
-    <script src="server.js"></script> <!-- Mise à jour du nom du fichier JavaScript -->
 
+    <!-- MENU NAVIGATION -->
+    <nav class="menu">
+      <button class="tablink active" onclick="openTab('supervision')">Supervision</button>
+      <button class="tablink" onclick="openTab('gestion')">Gestion des prises</button>
+      <button class="tablink" onclick="openTab('prix')">Prix du kWh</button>
+    </nav>
+
+    <!-- Onglet Supervision -->
+    <div id="supervision" class="tab-content active">
+      <h2>État des prises</h2>
+      <div id="status">En attente de connexion...</div>    
+      <div id="prises-container" class="center"></div><br>
+    </div>
+
+    <!-- Onglet Gestion -->
+    <div id="gestion" class="tab-content">
+      <h2>Gérer les prises</h2>
+
+      <ul id="prise-list" class="center"></ul>
+      <div id="prise-details"></div><br>
+
+      <div class="input-group">
+        <label for="prise-id"><b>ID de la prise :</b></label>
+        <input type="text" id="prise-id" placeholder="ID de la prise" />
+      </div>
+      <div class="input-group">
+        <label for="prise-name"><b>Nom de la prise :</b></label>
+        <input type="text" id="prise-name" placeholder="Nom de la prise" />
+      </div>
+      <div class="input-group">
+        <label for="prise-locality"><b>Localité de la prise :</b></label>
+        <input type="text" id="prise-locality" placeholder="Localité de la prise" />
+      </div>
+      <button id="add-prise-btn">Ajouter la prise</button>
+
+      <hr>
+
+      <button id="delete-prise-btn">Supprimer la prise sélectionnée</button>
+
+      <hr>
+
+      <div class="input-group">
+        <label for="nouveau-nom"><b>Nouveau nom :</b></label>
+        <input type="text" id="nouveau-nom" placeholder="Nouveau nom" />
+      </div>
+      <div class="input-group">
+        <label for="nouvelle-localite"><b>Nouvelle localité :</b></label>
+        <input type="text" id="nouvelle-localite" placeholder="Nouvelle localité" />
+      </div>
+      <button id="update-prise-btn">Modifier la prise sélectionnée</button>
+    </div>
+
+    <!-- Onglet Prix -->
+    <div id="prix" class="tab-content">
+      <h2>💰 Mettre à jour le prix du kWh</h2>
+      <div class="input-group">
+        <label for="prix-kwh"><b>Prix du kWh (€) :</b></label>
+        <input type="number" id="prix-kwh" step="0.01" min="0.01" />
+      </div>
+      <button id="update-price-btn">Mettre à jour le prix</button>
+      <p id="update-price-message" style="display: none"></p>
+    </div>
+
+  </div>
+
+  <script src="dashboard_admin.js"></script>
+  <script>
+    // Reprise de la logique des onglets et du thème
+    function openTab(tabId) {
+      document.querySelectorAll(".tab-content").forEach(div => div.classList.remove("active"));
+      document.querySelectorAll(".tablink").forEach(btn => btn.classList.remove("active"));
+      document.getElementById(tabId).classList.add("active");
+      event.currentTarget.classList.add("active");
+    }
+
+    let fontSizePct = 100;
+    document.getElementById("increase-text").addEventListener("click", () => {
+      fontSizePct += 10;
+      document.documentElement.style.fontSize = fontSizePct + "%";
+    });
+    document.getElementById("decrease-text").addEventListener("click", () => {
+      fontSizePct = Math.max(50, fontSizePct - 10);
+      document.documentElement.style.fontSize = fontSizePct + "%";
+    });
+    document.getElementById("toggle-theme").addEventListener("click", () => {
+      document.body.classList.toggle("dark");
+    });
+  </script>
 </body>
 </html>
