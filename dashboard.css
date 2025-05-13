@@ -1,0 +1,329 @@
+body {
+    background-color: #001735;
+    background-image: url("../images/light.png");
+    background-size: cover;
+    background-position: center center;
+    background-attachment: fixed;
+    color: #f7e7d7;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 20px;
+  }
+  
+  .container {
+    max-width: 1200px;
+    margin: auto;
+  }
+  
+  h1, h2, h3 {
+    color: #f7e7d7;
+  }
+  
+  button {
+    background-color: #001735;
+    border: 1px solid #f7e7d7;
+    color: #f7e7d7;
+    padding: 10px;
+    font-size: 1rem;
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin: 10px 5px;
+  }
+  
+  button:hover {
+    background-color: #f7e7d7;
+    color: #001735;
+  }
+  
+  input,
+  textarea {
+    background-color: #fff;
+    border: 1px solid #f7e7d7;
+    color: #001735;
+    padding: 10px;
+    font-size: 1rem;
+    border-radius: 4px;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  input:focus,
+  button:focus,
+  textarea:focus {
+    border-color: #001735;
+    box-shadow: 0 0 5px #001735;
+  }
+  
+  textarea {
+    resize: vertical;
+    height: 120px;
+  }
+  
+  .credit-info {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  
+  .credit-box {
+    flex: 1 1 200px;
+    margin: 10px;
+    padding: 15px;
+    background-color: #001735;
+    border: 1px solid #f7e7d7;
+    border-radius: 6px;
+    text-align: center;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: #fff;
+    color: #001735;
+  }
+  
+  th, td {
+    border: 1px solid #001735;
+    padding: 10px;
+    text-align: center;
+  }
+  
+  th {
+    background-color: #f7e7d7;
+  }
+  
+  #historyTable tbody {
+    display: block;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  
+  #historyTable thead,
+  #historyTable tbody tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+  }
+  
+  .bouton-desactive {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+  
+  .menu {
+    display: flex;
+    justify-content: space-around;
+    background-color: #001735;
+    border-bottom: 1px solid #f7e7d7;
+    padding: 10px 0;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  
+  .tablink {
+    background: none;
+    border: none;
+    color: #f7e7d7;
+    font-size: 1rem;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: color 0.3s;
+  }
+  
+  .tablink.active {
+    color: #ffffff;
+    border-bottom: 2px solid #f7e7d7;
+  }
+  
+  .tablink:hover {
+    color: #001735;
+    border-bottom: 2px solid #f7e7d7;
+  }
+  
+  .tab-content {
+    display: none;
+    animation: fade 0.4s ease-in-out;
+  }
+  
+  .center{
+    display: flex;
+    flex-direction: row;
+  }
+
+  .tab-content.active {
+    display: block;
+  }
+  
+  @keyframes fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  form input,
+  form textarea {
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .theme-settings {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-bottom: 15px;
+  }
+  
+  .theme-settings button {
+    background-color: #001735;
+    border: 1px solid #f7e7d7;
+    color: #f7e7d7;
+    padding: 5px 10px;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .theme-settings button:hover {
+    background-color: #f7e7d7;
+    color: #001735;
+  }
+  
+  .confirm-delete-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0 20px 0;
+  }
+  
+  .confirm-delete-container label {
+    margin: 0;
+    font-size: 1rem;
+  }
+  
+  #confirmDelete {
+    width: 1%;
+  }
+  
+  #deleteAccountForm div {
+    margin-bottom: 10px;
+  }
+  
+  #contact-form input[type="text"],
+  #contact-form textarea,
+  #deleteAccountForm input[type="email"],
+  #deleteAccountForm input[type="password"] {
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+  }
+  
+  .input-group label {
+    margin-bottom: 5px;
+    font-weight: 500;
+  }
+  
+  .input-group input {
+    padding: 8px;
+  }
+  #prises-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px; /* Espace entre les éléments */
+    margin-top: 20px;
+  }
+  
+  .prise {
+    background-color: #001735;
+    border-radius: 12px;
+    padding: 15px;
+    width: 280px;
+    position: relative;
+    box-shadow: inset 0 0 2px #f7e7d7;
+    margin-bottom: 20px; /* Espacement en bas */
+  }
+  
+  .prise::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 50px;
+    height: 5px;
+    background-color: #444;
+    border-radius: 3px;
+  }
+  
+  .prise .status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .prise .status .tag {
+    padding: 5px 10px;
+    background-color: #28a745;
+    border-radius: 50px;
+    color: white;
+    font-size: 0.9rem;
+  }
+  
+  
+  
+  
+  /* Thème sombre */
+  body.dark {
+    background-image: url("../images/dark.png");
+    background-size: cover;
+    background-position: center center;
+    background-attachment: fixed;
+    background-color: #121212;
+    color: #c6d0f5;
+  }
+  
+  body.dark input,
+  body.dark button,
+  body.dark textarea,
+  body.dark .credit-box,
+  body.dark table,
+  body.dark .menu{
+    background-color: #1e1e2e;
+    border-color: #89b4fa;
+    color: #c6d0f5;
+  }
+  
+  body.dark button:hover{
+    background-color: #c6d0f5;
+    color: #121212;
+  }
+  
+  body.dark h1,
+  body.dark h2,
+  body.dark h3 {
+    color: #c6d0f5;
+  }
+  
+  body.dark .tablink.active {
+    border-bottom: 2px solid #c6d0f5;
+  }
+  
+  body.dark .tablink:hover {
+    color: #001735;
+    border-bottom: 2px solid #c6d0f5;
+  }
+  
+  body.dark th {
+    background-color: #c6d0f5;
+    color: #001735;
+  }
+  
