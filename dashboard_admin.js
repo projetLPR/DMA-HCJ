@@ -166,6 +166,11 @@ class ShellyManager {
             this.updatePriseData(topic, message);
         });
     
+        this.client.on('close', () => {
+            console.warn("MQTT déconnecté, tentative de reconnexion...");
+            setTimeout(() => this.connectMQTT(), 3000);
+        });
+
         this.client.on('error', err => {
             console.error('❌ Erreur MQTT :', err);
             document.getElementById('status').textContent = 'Erreur MQTT';
