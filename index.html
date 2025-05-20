@@ -85,27 +85,5 @@
   </div>
 
   <script src="dashboard_admin.js"></script>
-  <script>
-    // Reprise de la logique des onglets et du thème
-    function openTab(tabId) {
-      document.querySelectorAll(".tab-content").forEach(div => div.classList.remove("active"));
-      document.querySelectorAll(".tablink").forEach(btn => btn.classList.remove("active"));
-      document.getElementById(tabId).classList.add("active");
-      event.currentTarget.classList.add("active");
-    }
-
-    let fontSizePct = 100;
-    document.getElementById("increase-text").addEventListener("click", () => {
-      fontSizePct += 10;
-      document.documentElement.style.fontSize = fontSizePct + "%";
-    });
-    document.getElementById("decrease-text").addEventListener("click", () => {
-      fontSizePct = Math.max(50, fontSizePct - 10);
-      document.documentElement.style.fontSize = fontSizePct + "%";
-    });
-    document.getElementById("toggle-theme").addEventListener("click", () => {
-      document.body.classList.toggle("dark");
-    });
-  </script>
 </body>
 </html>
