@@ -1,3 +1,5 @@
+
+
 // server.js
 const express = require('express');
 const mysql   = require('mysql2');
@@ -83,7 +85,7 @@ app.put('/update/:id', (req, res) => {
 
 // 3.4. Supprimer une prise
 // Paramètre URL : l’ID de table (champ `id`)
-app.delete('/delete/:id', (req, res) => {
+app.delete('/prises/:id', (req, res) => {
   const id = req.params.id;
   const sql = 'DELETE FROM ids WHERE id = ?';
   db.query(sql, [id], err => {
