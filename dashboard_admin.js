@@ -3,12 +3,13 @@
 // ——————————————
 class PriseManager {
     constructor(shellyManagerInstance) {
-        this.liste = [];
-        this.selection = null;
-        this.apiUrl = 'http://localhost:3000';
-        this.shellyManager = shellyManagerInstance;
+        this.liste = [];// Contient la liste des prises récupérées depuis l'API
+        this.selection = null; // Contient la prise actuellement sélectionnée
+        this.apiUrl = 'http://localhost:3000'; // Adresse de l’API Node.js
+        this.shellyManager = shellyManagerInstance; // Référence vers l’instance ShellyManager
     }
 
+    // Récupère la liste des prises depuis l’API et les affiche dynamiquement dans la liste HTML
     chargerListe() {
         fetch(`${this.apiUrl}/ids`)
           .then(res => res.json())
@@ -26,7 +27,7 @@ class PriseManager {
           })
           .catch(err => console.error('Erreur GET /ids :', err));
     }
-
+    // Affiche les détails d’une prise sélectionnée
     afficherDetails(id) {
         const p = this.liste.find(x => String(x.id) === String(id));
         if (!p) return;
@@ -41,11 +42,13 @@ class PriseManager {
         `;
     }
 
+    // Efface les détails affichés et réinitialise la sélection
     clearDetails() {
         document.getElementById('prise-details').innerHTML = '';
         this.selection = null;
     }
 
+    // Initialise tous les écouteurs d’événements pour les boutons d’ajout, de suppression et de modification
     initListeners() {
         document.getElementById('prise-list').addEventListener('click', e => {
             if (e.target.tagName === 'BUTTON') {
@@ -53,7 +56,7 @@ class PriseManager {
             }
         });
 
-                // Ajouts champs
+        // Bouton d’ajout de prise
         document.getElementById('add-prise-btn').addEventListener('click', () => {
             const nom = document.getElementById('prise-name').value.trim();
             const loc = document.getElementById('prise-locality').value.trim();
@@ -72,7 +75,7 @@ class PriseManager {
                 this.chargerListe();
                 this.shellyManager.addPrise(nom, loc, vid);
             
-                // Nettoyer les champs
+                // Réinitialiser les champs de formulaire
                 document.getElementById('prise-name').value = '';
                 document.getElementById('prise-locality').value = '';
                 document.getElementById('prise-id').value = '';
@@ -80,7 +83,7 @@ class PriseManager {
             .catch(err => console.error('Erreur POST /add :', err));
         });
 
-                // Suppression champs
+        // Bouton de mise à jour des informations d’une prise
         document.getElementById('delete-prise-btn').addEventListener('click', () => {
             if (!this.selection) return alert('Veuillez sélectionner une prise');
             if (!confirm('Confirmer la suppression ?')) return;
@@ -99,7 +102,7 @@ class PriseManager {
             .catch(err => alert("Erreur lors de la suppression : " + err.message));            
         });
 
-                // Modification champs
+        // Bouton de mise à jour des informations d’une prise
         document.getElementById('update-prise-btn').addEventListener('click', () => {
             if (!this.selection) return alert('Veuillez sélectionner une prise');
             const nom = document.getElementById('nouveau-nom').value.trim();
@@ -117,7 +120,7 @@ class PriseManager {
                 this.clearDetails();
                 this.chargerListe();
             
-                // Nettoyer les champs de modification
+                // Réinitialiser les champs de modification
                 document.getElementById('nouveau-nom').value = '';
                 document.getElementById('nouvelle-localite').value = '';
             })
@@ -126,6 +129,7 @@ class PriseManager {
         });
     }
 
+    // Initialise l'application (écouteurs + chargement des prises)
     initialiser() {
         this.initListeners();
         this.chargerListe();
