@@ -1,9 +1,9 @@
 
-
 // server.js
 const express = require('express');
 const mysql   = require('mysql2');
 const cors    = require('cors');
+require('dotenv').config();
 
 const app  = express();
 const port = 3000;
@@ -18,10 +18,16 @@ app.use(express.json()); // remplace body-parser
 // 2. Connexion MySQL
 // --------------------
 const db = mysql.createConnection({
-  host:     'localhost',
-  user:     'ciel',
-  password: 'ciel',
-  database: 'mon_projet'
+  host:     process.env.MYSQL_HOST,
+  user:     process.env.MYSQL_USER,
+  password: process.env.MYSQL_PASSWORD,
+  database: process.env.MYSQL_DATABASE
+});
+console.log('MySQL Config:', {
+  host:     process.env.MYSQL_HOST,
+  user:     process.env.MYSQL_USER,
+  password: process.env.MYSQL_PASSWORD,
+  database: process.env.MYSQL_DATABASE
 });
 db.connect(err => {
   if (err) {
@@ -95,6 +101,23 @@ app.delete('/prises/:id', (req, res) => {
     }
     res.json({ message: 'Prise supprimée avec succès' });
   });
+});
+
+// 3.5. Route pour exposer les variables front-end
+app.get('/mqtt-config', (req, res) => {
+  res.json({
+    mqttBroker: process.env.MQTT_BROKER_URL,
+    username: process.env.MQTT_BROKER_USERNAME,
+    password: process.env.MQTT_BROKER_PASSWORD,
+    protocol: process.env.MQTT_BROKER_PROTOCOL
+    
+  });
+});
+console.log('MQTT config:', {
+  broker: process.env.MQTT_BROKER_URL,
+  user: process.env.MQTT_BROKER_USERNAME,
+  pass: process.env.MQTT_BROKER_PASSWORD,
+  proto: process.env.MQTT_BROKER_PROTOCOL
 });
 
 // --------------------
